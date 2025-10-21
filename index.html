@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Territory.io - Multiplayer Territory Conquest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2>Territory.io</h2>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+            </div>
+            <div id="loginForm" class="auth-form active">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button onclick="handleLogin()">Login</button>
+                <button onclick="playAsGuest()" class="guest-btn">Play as Guest</button>
+            </div>
+            <div id="registerForm" class="auth-form">
+                <input type="text" id="regUsername" placeholder="Username (min 3 chars)" required>
+                <input type="password" id="regPassword" placeholder="Password (min 6 chars)" required>
+                <button onclick="handleRegister()">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shopModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Shop</h2>
+                <button class="close-btn" onclick="closeShop()">&times;</button>
+            </div>
+            <div class="coins-display">Coins: <span id="playerCoins">0</span></div>
+            <div class="skins-grid" id="skinsGrid">
+                <!-- Skins will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Rankings Modal -->
+    <div id="rankingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rankings</h2>
+                <button class="close-btn" onclick="closeRankings()">&times;</button>
+            </div>
+            <div class="rankings-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Best Territory %</th>
+                            <th>Total Kills</th>
+                            <th>Games Played</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingsBody">
+                        <!-- Rankings populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Lobby -->
+    <div id="lobby" class="screen">
+        <div class="lobby-content">
+            <h1>Territory.io</h1>
+            <div class="player-info">
+                <p>Welcome, <span id="playerName">Guest</span>!</p>
+                <p>Coins: <span id="lobbyCoins">0</span></p>
+            </div>
+            <div class="lobby-buttons">
+                <button class="play-btn" onclick="startGame()">Play Game</button>
+                <div class="menu-buttons">
+                    <button onclick="openShop()">Shop</button>
+                    <button onclick="openRankings()">Rankings</button>
+                    <button onclick="logout()" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <!-- HUD -->
+        <div class="hud">
+            <div class="hud-left">
+                <div class="stat">Territory: <span id="territoryPercent">0</span>%</div>
+                <div class="stat">Kills: <span id="killCount">0</span></div>
+                <div class="stat">Ammo: <span id="ammoCount">0</span></div>
+            </div>
+            <div class="hud-right">
+                <div class="leaderboard">
+                    <h3>Leaderboard</h3>
+                    <div id="leaderboardList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Boost Meter -->
+        <div class="boost-meter">
+            <div class="boost-label">Boost</div>
+            <div class="boost-bar">
+                <div class="boost-fill" id="boostFill"></div>
+            </div>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div class="mobile-controls">
+            <div class="joystick-container">
+                <div class="joystick" id="joystick">
+                    <div class="joystick-knob" id="joystickKnob"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" id="shootBtn">Shoot</button>
+                <button class="action-btn" id="boostBtn">Boost</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Death Screen -->
+    <div id="deathScreen" class="modal">
+        <div class="modal-content">
+            <h2>You Died!</h2>
+            <div class="death-stats">
+                <p>Final Territory: <span id="finalTerritory">0</span>%</p>
+                <p>Kills: <span id="finalKills">0</span></p>
+                <p>Survival Time: <span id="survivalTime">0</span>s</p>
+                <p>Coins Earned: <span id="coinsEarned">0</span></p>
+            </div>
+            <button onclick="respawn()">Respawn</button>
+            <button onclick="backToLobby()">Back to Lobby</button>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victoryScreen" class="modal">
+        <div class="modal-content">
+            <h2>Victory!</h2>
+            <div class="victory-stats">
+                <p>Final Territory: <span id="victoryTerritory">0</span>%</p>
+                <p>Kills: <span id="victoryKills">0</span></p>
+                <p>Game Duration: <span id="gameDuration">0</span>s</p>
+                <p>Coins Earned: <span id="victoryCoins">0</span></p>
+            </div>
+            <button onclick="playAgain()">Play Again</button>
+            <button onclick="backToLobby()">Back to Lobby</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
